@@ -196,6 +196,7 @@ body{background:var(--bg);color:var(--dark);font-family:'Poppins',sans-serif;fon
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
     <span class="tooltip">Formulaires</span>
   </div>
+  <button class="nav-btn" data-view="import">📄</button>
 </nav>
 
 <div class="main">
@@ -315,7 +316,33 @@ body{background:var(--bg);color:var(--dark);font-family:'Poppins',sans-serif;fon
         Les projets sont affichés en consultation directe dans le portail.
       </div>
     </section>
+    
+<!--IMPORT-->
+    <section id="view-import" class="view hidden">
+  <h1>Import Salesforce</h1>
 
+  <div class="card">
+    <h3>📥 Télécharger un template</h3>
+
+    <select id="template-select">
+      <option value="">Choisir un type</option>
+      <option value="compte">Import Compte</option>
+      <option value="gaz">Import Compteur Gaz</option>
+      <option value="elec">Import Compteur Elec</option>
+    </select>
+
+    <br /><br />
+
+    <button id="download-template" class="btn">Télécharger</button>
+  </div>
+
+  <div class="card">
+    <h3>📤 Envoyer le fichier</h3>
+    <a href="mailto:crm@capitole-energie.com" class="btn">
+      Envoyer par email
+    </a>
+  </div>
+</section>
     <!-- FORMULAIRES -->
     <section class="section" id="s-forms">
       <div class="page-title">Formulaires de demande</div>
@@ -848,6 +875,18 @@ document.addEventListener('DOMContentLoaded',()=>{
   const d=new Date(),s=d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   document.getElementById('today-date').textContent=s.charAt(0).toUpperCase()+s.slice(1);
   refreshAll();
+});
+  const TEMPLATE_FILE = '/templates/import_sf.xlsx';
+
+document.getElementById('download-template')?.addEventListener('click', () => {
+  const type = document.getElementById('template-select').value;
+
+  if (!type) {
+    alert('Veuillez sélectionner un type');
+    return;
+  }
+
+  window.open(TEMPLATE_FILE, '_blank');
 });
 </script>
 </body>
