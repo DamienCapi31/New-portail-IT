@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Portail Informatique — Capitole Énergie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --blue:#0C32FF;--pink:#E543DC;--yellow:#FFC14F;--dark:#232323;
+  --bg:#F3F3F3;--grey2:#E3E3E3;--grey3:#A8A8A8;--text:#4D4D4D;
+  --green:#52DD5D;--teal:#33CFAA;--coral:#EE734F;--purple:#9D4EDD;
+  --blue50:#F5F6FF;--blue100:#CCD4FF;
+  --shadow:3px 3px 12px rgba(35,35,35,.09);--shadow-lg:3px 3px 20px rgba(35,35,35,.16);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--dark);font-family:'Poppins',sans-serif;font-size:14px;line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--blue100);border-radius:3px}
+
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:72px;background:#fff;border-right:1px solid var(--grey2);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:4px;z-index:100;box-shadow:3px 0 12px rgba(35,35,35,.06)}
+.logo{width:42px;height:42px;border-radius:12px;margin-bottom:16px;flex-shrink:0;background:linear-gradient(135deg,var(--blue),var(--pink));display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;color:#fff;box-shadow:0 4px 14px rgba(12,50,255,.28)}
+.divider{width:32px;height:1px;background:var(--grey2);margin:6px 0}
+.nav-btn{width:48px;height:48px;border-radius:12px;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0;color:var(--grey3);background:transparent;border:1px solid transparent}
+.nav-btn svg{width:20px;height:20px}
+.nav-btn:hover{background:var(--bg);color:var(--dark)}
+.nav-btn.active{background:var(--blue50);color:var(--blue);border-color:var(--blue100)}
+.nav-btn.active::before{content:'';position:absolute;left:-1px;top:50%;transform:translateY(-50%);width:3px;height:24px;background:var(--blue);border-radius:0 2px 2px 0}
+.tooltip{position:absolute;left:calc(100% + 10px);background:var(--dark);color:#fff;font-size:11px;font-weight:500;white-space:nowrap;padding:5px 10px;border-radius:6px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200}
+.nav-btn:hover .tooltip{opacity:1}
+
+.main{margin-left:72px;min-height:100vh;display:flex;flex-direction:column}
+.topbar{height:58px;background:#fff;border-bottom:1px solid var(--grey2);display:flex;align-items:center;justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:50;box-shadow:0 1px 6px rgba(35,35,35,.06)}
+.topbar-brand{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-.3px}
+.topbar-sep{color:var(--grey2);margin:0 8px;font-size:18px}
+.topbar-section{font-size:13px;font-weight:500;color:var(--blue);background:var(--blue50);padding:3px 12px;border-radius:20px;border:1px solid var(--blue100)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.live-badge{display:flex;align-items:center;gap:6px;background:var(--blue50);border:1px solid var(--blue100);border-radius:8px;padding:5px 12px;font-size:12px;color:var(--blue);font-weight:500}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 2px rgba(82,221,93,.3)}50%{box-shadow:0 0 0 5px rgba(82,221,93,0)}}
+
+/* BOUTON ACTUALISER */
+.refresh-btn{
+  display:flex;align-items:center;gap:6px;
+  background:#fff;border:1px solid var(--grey2);border-radius:8px;
+  padding:5px 12px;font-size:12px;color:var(--text);font-weight:500;
+  cursor:pointer;transition:all .2s;font-family:'Poppins',sans-serif;
+}
+.refresh-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue50)}
+.refresh-btn svg{width:14px;height:14px;transition:transform .5s}
+.refresh-btn.spinning svg{animation:spin-icon .7s linear infinite}
+@keyframes spin-icon{to{transform:rotate(360deg)}}
+.refresh-btn .last-update{font-size:10px;color:var(--grey3);font-weight:400}
+
+.content{flex:1;padding:28px 32px}
+.section{display:none;animation:fadeIn .22s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.page-title{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;letter-spacing:-.5px;margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--grey3);margin-bottom:24px}
+.sep{font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--grey3);display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.sep::after{content:'';flex:1;height:1px;background:var(--grey2)}
+
+.welcome{background:linear-gradient(135deg,#0C32FF 0%,#1A3DFF 55%,#4D68FF 100%);border-radius:16px;padding:28px 32px;margin-bottom:28px;position:relative;overflow:hidden;color:#fff}
+.welcome::before{content:'';position:absolute;top:-50px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.07);pointer-events:none}
+.welcome::after{content:'';position:absolute;bottom:-35px;right:90px;width:130px;height:130px;border-radius:50%;background:rgba(229,67,220,.18);pointer-events:none}
+.welcome h2{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px;margin-bottom:6px}
+.welcome p{font-size:13px;opacity:.82;max-width:520px;line-height:1.6}
+.welcome-tag{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:500;margin-top:14px;letter-spacing:.3px}
+
+/* KPI SKELETON */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:28px}
+.kpi-card{background:#fff;border:1px solid var(--grey2);border-radius:14px;padding:20px 22px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;transition:all .2s}
+.kpi-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-1px)}
+.kpi-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.kpi-icon svg{width:22px;height:22px}
+.kpi-val{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:36px;line-height:1;color:var(--dark);transition:all .3s}
+.kpi-lbl{font-weight:600;font-size:10px;color:var(--grey3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px}
+.kpi-sub{font-size:11px;color:var(--grey3);margin-top:2px}
+.ratio-card{background:#fff;border:1px solid var(--grey2);border-radius:14px;padding:20px 22px;box-shadow:var(--shadow);transition:all .2s}
+.ratio-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-1px)}
+.prog-bar{height:6px;background:var(--bg);border-radius:3px;overflow:hidden;margin-top:12px}
+.prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--blue),var(--pink));transition:width .5s ease}
+.prog-footer{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--grey3)}
+
+/* SKELETON LOADER */
+.skeleton{background:linear-gradient(90deg,var(--grey2) 25%,var(--bg) 50%,var(--grey2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+.nav-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.nav-card{background:#fff;border:1px solid var(--grey2);border-radius:14px;padding:22px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;text-decoration:none;color:inherit}
+.nav-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.nav-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center}
+.nav-icon svg{width:24px;height:24px}
+.nav-title{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;margin-bottom:4px}
+.nav-desc{font-size:13px;color:var(--text);line-height:1.5}
+.nav-arrow{margin-top:auto;font-weight:600;font-size:14px}
+
+/* PROJETS KANBAN */
+.proj-kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:28px}
+.proj-kpi{background:#fff;border:1px solid var(--grey2);border-radius:10px;padding:16px 18px;display:flex;align-items:center;gap:10px;box-shadow:2px 2px 8px rgba(35,35,35,.06)}
+.proj-kpi-val{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:30px;line-height:1;transition:all .3s}
+.proj-kpi-lbl{font-weight:600;font-size:10px;color:var(--grey3);text-transform:uppercase;letter-spacing:.4px}
+.kanban{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;align-items:start}
+.kanban-col{background:#fff;border:1px solid var(--grey2);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.kanban-header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bg)}
+.kanban-title{font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.6px}
+.kanban-count{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px}
+.kanban-cards{padding:10px;display:flex;flex-direction:column;gap:8px;min-height:40px}
+.proj-card{background:var(--bg);border:1px solid var(--grey2);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .2s}
+.proj-card:hover{background:#fff;box-shadow:var(--shadow);transform:translateY(-1px)}
+.proj-card-name{font-weight:600;font-size:13px;color:var(--dark);line-height:1.35;margin-bottom:8px}
+.proj-card-footer{display:flex;align-items:center;justify-content:space-between}
+.avatars{display:flex}
+.avatar{width:22px;height:22px;border-radius:50%;border:2px solid #fff;margin-left:-5px;overflow:hidden;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center;background:var(--blue50);color:var(--blue);flex-shrink:0}
+.avatar:first-child{margin-left:0}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.empty-col{padding:10px;text-align:center;font-size:12px;color:var(--grey3);font-style:italic}
+
+/* FORMULAIRES */
+.forms-tabs{display:flex;gap:8px;margin-bottom:24px;border-bottom:2px solid var(--grey2);padding-bottom:0}
+.form-tab{padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;border-radius:8px 8px 0 0;color:var(--grey3);border:none;background:transparent;transition:all .2s;position:relative;bottom:-2px;border-bottom:2px solid transparent;font-family:'Poppins',sans-serif}
+.form-tab:hover{color:var(--dark);background:var(--bg)}
+.form-tab.active{color:var(--blue);border-bottom-color:var(--blue);background:#fff}
+.form-panel{display:none}
+.form-panel.active{display:block;animation:fadeIn .2s ease}
+.form-card{background:#fff;border:1px solid var(--grey2);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);max-width:780px}
+.form-card-header{padding:24px 28px;border-bottom:1px solid var(--bg);display:flex;align-items:flex-start;gap:16px}
+.form-card-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.form-card-icon svg{width:24px;height:24px}
+.form-card-title{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:var(--dark);margin-bottom:3px}
+.form-card-sub{font-size:12px;font-weight:600;margin-bottom:5px}
+.form-card-desc{font-size:13px;color:var(--text);line-height:1.55}
+.form-body{padding:28px}
+.form-row{display:grid;gap:16px;margin-bottom:16px}
+.form-row.two{grid-template-columns:1fr 1fr}
+.form-row.one{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:12px;font-weight:600;color:var(--dark)}
+.form-label span{color:#e53e3e;margin-left:2px}
+.form-hint{font-size:11px;color:var(--grey3);margin-top:2px;line-height:1.45}
+.form-input,.form-select,.form-textarea{width:100%;padding:10px 14px;border:1.5px solid var(--grey2);border-radius:9px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--dark);background:#fff;transition:all .2s;outline:none;appearance:none;-webkit-appearance:none}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(12,50,255,.08)}
+.form-input.error,.form-select.error,.form-textarea.error{border-color:#e53e3e;box-shadow:0 0 0 3px rgba(229,62,62,.08)}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--grey3)}
+.form-textarea{resize:vertical;min-height:110px;line-height:1.6}
+.select-wrap{position:relative}
+.select-wrap::after{content:'▾';position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:12px;color:var(--grey3)}
+.form-select{padding-right:36px;cursor:pointer}
+.form-error-msg{font-size:11px;color:#e53e3e;font-weight:500;margin-top:3px;display:none}
+.form-error-msg.show{display:block}
+.file-drop{border:2px dashed var(--grey2);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg)}
+.file-drop:hover,.file-drop.dragover{border-color:var(--blue);background:var(--blue50)}
+.file-drop-icon{font-size:24px;margin-bottom:6px}
+.file-drop p{font-size:12px;color:var(--grey3)}
+.file-drop p strong{color:var(--blue);cursor:pointer;text-decoration:underline}
+.file-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.file-item{display:flex;align-items:center;justify-content:space-between;background:var(--blue50);border:1px solid var(--blue100);border-radius:7px;padding:6px 12px;font-size:12px}
+.file-item-name{font-weight:500;color:var(--dark);max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-remove{background:none;border:none;color:var(--grey3);cursor:pointer;font-size:16px;line-height:1;padding:0 2px;transition:color .2s}
+.file-remove:hover{color:#e53e3e}
+.form-submit{width:100%;padding:14px;border:none;border-radius:10px;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;color:#fff;cursor:pointer;transition:all .25s;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:10px}
+.form-submit:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.18)}
+.form-submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.spin{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .7s linear infinite;display:none}
+.form-submit.loading .spin{display:block}
+.form-submit.loading .btn-text{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.toast{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;align-items:flex-start;gap:12px;background:#fff;border:1px solid var(--grey2);border-radius:14px;padding:16px 20px;box-shadow:var(--shadow-lg);transform:translateY(80px);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);max-width:380px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.toast-icon svg{width:18px;height:18px}
+.toast-title{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;margin-bottom:3px}
+.toast-msg{font-size:12px;color:var(--text);line-height:1.5}
+
+@media(max-width:900px){.kpi-grid{grid-template-columns:1fr 1fr}.proj-kpi-grid{grid-template-columns:repeat(3,1fr)}.kanban{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.sidebar{width:56px}.main{margin-left:56px}.content{padding:18px 14px}.kpi-grid{grid-template-columns:1fr}.proj-kpi-grid{grid-template-columns:repeat(2,1fr)}.form-row.two{grid-template-columns:1fr}.kanban{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="logo">CE</div>
+  <div class="divider"></div>
+  <div class="nav-btn active" data-s="dashboard" onclick="go('dashboard',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    <span class="tooltip">Sommaire</span>
+  </div>
+  <div class="nav-btn" data-s="projects" onclick="go('projects',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+    <span class="tooltip">Projets</span>
+  </div>
+  <div class="nav-btn" data-s="forms" onclick="go('forms',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+    <span class="tooltip">Formulaires</span>
+  </div>
+</nav>
+
+<div class="main">
+  <header class="topbar">
+    <div style="display:flex;align-items:center">
+      <span class="topbar-brand">Portail Informatique</span>
+      <span class="topbar-sep">/</span>
+      <span class="topbar-section" id="section-label">Sommaire</span>
+    </div>
+    <div class="topbar-right">
+      <span id="today-date" style="font-size:12px;color:var(--grey3)"></span>
+      <!-- BOUTON ACTUALISER -->
+      <button class="refresh-btn" id="refresh-btn" onclick="refreshAll()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+        </svg>
+        Actualiser
+        <span class="last-update" id="last-update"></span>
+      </button>
+      <div class="live-badge"><div class="live-dot"></div>IT / RSI</div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- SOMMAIRE -->
+    <section class="section active" id="s-dashboard">
+      <div class="welcome">
+        <h2>Bienvenue sur le Portail IT 👋</h2>
+        <p>KPIs tickets, projets en cours et formulaires de demande — tout en un seul endroit pour l'équipe IT / RSI.</p>
+        <span class="welcome-tag">IT / RSI — Capitole Énergie</span>
+      </div>
+      <p class="sep">Tickets de support</p>
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background:#52DD5D18;color:var(--green)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div>
+            <div class="kpi-val" id="kpi-done">—</div>
+            <div class="kpi-lbl">Tickets traités</div>
+            <div class="kpi-sub">Statut Done</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background:#EE734F18;color:var(--coral)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div>
+            <div class="kpi-val" id="kpi-todo">—</div>
+            <div class="kpi-lbl">À faire</div>
+            <div class="kpi-sub">En attente de traitement</div>
+          </div>
+        </div>
+        <div class="ratio-card">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:36px;line-height:1;color:var(--dark);transition:all .3s" id="kpi-ratio">—</div>
+              <div style="font-weight:600;font-size:10px;color:var(--grey3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px">Taux de résolution</div>
+            </div>
+            <div class="kpi-icon" style="background:#E543DC18;color:var(--pink)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+          </div>
+          <div class="prog-bar"><div class="prog-fill" id="kpi-progfill" style="width:0%"></div></div>
+          <div class="prog-footer">
+            <span id="kpi-prog-left">Chargement…</span>
+            <span id="kpi-prog-right"></span>
+          </div>
+        </div>
+      </div>
+      <p class="sep">Navigation rapide</p>
+      <div class="nav-grid">
+        <div class="nav-card" onclick="go('projects',document.querySelector('[data-s=projects]'))">
+          <div class="nav-icon" style="background:#E543DC18;color:var(--pink)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+          </div>
+          <div><div class="nav-title">Projets en cours</div><p class="nav-desc">Vue kanban des projets actifs par statut.</p></div>
+          <span class="nav-arrow" style="color:var(--pink)">Voir les projets →</span>
+        </div>
+        <div class="nav-card" onclick="go('forms',document.querySelector('[data-s=forms]'))">
+          <div class="nav-icon" style="background:#FFC14F18;color:var(--yellow)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          </div>
+          <div><div class="nav-title">Formulaires</div><p class="nav-desc">Urgence, nouveau projet, bug CRM — à remplir directement ici.</p></div>
+          <span class="nav-arrow" style="color:var(--yellow)">Accéder →</span>
+        </div>
+        <div class="nav-card" style="cursor:default">
+          <div class="nav-icon" style="background:#0C32FF18;color:var(--blue)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          </div>
+          <div><div class="nav-title">Tickets synchronisés</div><p class="nav-desc">Le sommaire et les formulaires alimentent directement ClickUp sans lien externe depuis le portail.</p></div>
+          <span class="nav-arrow" style="color:var(--blue)">Suivi intégré</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJETS KANBAN -->
+    <section class="section" id="s-projects">
+      <div class="page-title">Projets en cours</div>
+      <p class="page-sub">Demandes Métiers IT · Projets en cours · IT / RSI — données en direct</p>
+      <div class="proj-kpi-grid" id="proj-kpis">
+        <div class="proj-kpi"><div class="proj-kpi-val skeleton" style="width:40px;height:36px"> </div><div class="proj-kpi-lbl">Total</div></div>
+        <div class="proj-kpi"><div class="proj-kpi-val skeleton" style="width:30px;height:36px"> </div><div class="proj-kpi-lbl">En cours</div></div>
+        <div class="proj-kpi"><div class="proj-kpi-val skeleton" style="width:30px;height:36px"> </div><div class="proj-kpi-lbl">En pause</div></div>
+        <div class="proj-kpi"><div class="proj-kpi-val skeleton" style="width:30px;height:36px"> </div><div class="proj-kpi-lbl">En test</div></div>
+        <div class="proj-kpi"><div class="proj-kpi-val skeleton" style="width:30px;height:36px"> </div><div class="proj-kpi-lbl">Livrés</div></div>
+      </div>
+      <div class="kanban" id="kanban-board">
+        <div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--grey3);font-size:13px">
+          <div class="skeleton" style="width:200px;height:16px;margin:0 auto 8px"></div>
+          <div class="skeleton" style="width:140px;height:12px;margin:0 auto"></div>
+        </div>
+      </div>
+      <div style="margin-top:18px;color:var(--grey3);font-size:12px;font-weight:500">
+        Les projets sont affichés en consultation directe dans le portail.
+      </div>
+    </section>
+
+    <!-- FORMULAIRES -->
+    <section class="section" id="s-forms">
+      <div class="page-title">Formulaires de demande</div>
+      <p class="page-sub">Soumettez vos demandes IT — elles seront créées automatiquement dans ClickUp</p>
+      <div class="forms-tabs">
+        <button class="form-tab active" onclick="switchTab('urgence',this)">🚨 Incident urgent</button>
+        <button class="form-tab" onclick="switchTab('projet',this)">📋 Demande de projet</button>
+        <button class="form-tab" onclick="switchTab('bug',this)">🐛 Bug / Incident IT</button>
+      </div>
+
+      <!-- URGENCE -->
+      <div class="form-panel active" id="panel-urgence">
+        <div class="form-card" style="border-top:3px solid var(--coral)">
+          <div class="form-card-header">
+            <div class="form-card-icon" style="background:#EE734F18;color:var(--coral)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div>
+              <div class="form-card-title">Déclaration d'incident urgent IT</div>
+              <div class="form-card-sub" style="color:var(--coral)">Réservé aux incidents bloquants</div>
+              <p class="form-card-desc">Ce formulaire est réservé aux <strong>incidents bloquants</strong> qui empêchent de travailler. Pour toute demande non critique, utilisez le formulaire <em>Bug / Incident</em>.</p>
+            </div>
+          </div>
+          <div class="form-body">
+            <form id="form-urgence" novalidate>
+              <div class="form-row one"><div class="form-group">
+                <label class="form-label">Email <span>*</span></label>
+                <input class="form-input" type="email" id="urg-email" placeholder="votre@capitole-energie.com" required/>
+                <span class="form-error-msg" id="urg-email-err">Email invalide</span>
+              </div></div>
+              <div class="form-row two">
+                <div class="form-group">
+                  <label class="form-label">Service <span>*</span></label>
+                  <div class="select-wrap"><select class="form-select" id="urg-service" required>
+                    <option value="">Sélectionner…</option>
+                    <option>Commercial</option><option>Back-Office</option><option>Finance</option>
+                    <option>Marketing</option><option>Pricing</option><option>Direction</option>
+                    <option>IT / RSI</option><option>RH</option><option>Autre</option>
+                  </select></div>
+                  <span class="form-error-msg" id="urg-service-err">Champ obligatoire</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Outil concerné <span>*</span></label>
+                  <div class="select-wrap"><select class="form-select" id="urg-outil" required>
+                    <option value="">Sélectionner…</option>
+                    <option>Zendesk</option><option>Microsoft 365</option><option>Microsoft Account</option>
+                    <option>Discord</option><option>PowerBI</option><option>3CX</option>
+                    <option>Enedis</option><option>Hubspot</option><option>Matériel IT</option>
+                  </select></div>
+                  <span class="form-error-msg" id="urg-outil-err">Champ obligatoire</span>
+                </div>
+              </div>
+              <div class="form-row one"><div class="form-group">
+                <label class="form-label">Criticité métier <span>*</span></label>
+                <div class="select-wrap"><select class="form-select" id="urg-criticite" required>
+                  <option value="">Sélectionner…</option>
+                  <option value="Mineur">Mineur — Pas d'impact métier immédiat</option>
+                  <option value="Modéré">Modéré — Impact limité</option>
+                  <option value="Majeure">Majeure — Impact métier fortement ralenti</option>
+                  <option value="Bloquant">Bloquant — Activité arrêtée</option>
+                </select></div>
+                <span class="form-error-msg" id="urg-criticite-err">Champ obligatoire</span>
+              </div></div>
+              <div class="form-row one"><div class="form-group">
+                <label class="form-label">Titre de la demande <span>*</span></label>
+                <input class="form-input" type="text" id="urg-titre" placeholder="Saisir votre texte" required/>
+                <span class="form-error-msg" id="urg-titre-err">Champ obligatoire</span>
+              </div></div>
+              <div class="form-row one"><div class="form-group">
+                <label class="form-label">Description de la demande <span>*</span></label>
+                <p class="form-hint">Décrivez le problème observé et comment le reproduire ?</p>
+                <textarea class="form-textarea" id="urg-desc" placeholder="Décrivez l'incident en détail..." required></textarea>
+                <span class="form-error-msg" id="urg-desc-err">Champ obligatoire</span>
+              </div></div>
+              <div class="form-row one"><div class="form-group">
+                <label class="form-label">Pièces jointes</label>
+                <div class="file-drop" id="urg-drop" onclick="document.getElementById('urg-file-input').click()" ondragover="dragOver(event,'urg-drop')" ondragleave="dragLeave(event,'urg-drop')" ondrop="dropFile(event,'urg-files','urg-drop')">
+                  <div class="file-drop-icon">📎</div><p>Déposez vos fichiers ici ou <strong>cliquez pour charger</strong></p>
+                </div>
+                <input type="file" id="urg-file-input" multiple style="display:none" onchange="addFiles(this,'urg-files')"/>
+                <div class="file-list" id="urg-files"></div>
+              </div></div>
+              <button type="button" class="form-submit" style="background:var(--coral)" onclick="submitForm('urgence',this)">
+                <div class="spin"></div><span class="btn-text">🚨 Envoyer la déclaration d'urgence</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROJET -->
+      <div class="form-panel" id="panel-projet">
+        <div class="form-card" style="border-top:3px solid var(--blue)">
+          <div class="form-card-header">
+            <div class="form-card-icon" style="background:#0C32FF18;color:var(--blue)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+            </div>
+            <div>
+              <div class="form-card-title">Demande de projet ou amélioration IT</div>
+              <div class="form-card-sub" style="color:var(--blue)">Nouveau besoin métier ou optimisation</div>
+              <p class="form-card-desc">Plus vos informations sont précises, plus nous pourrons qualifier et prioriser rapidement la demande.</p>
+            </div>
+          </div>
+          <div class="form-body">
+            <form id="form-projet" novalidate>
+              <div class="form-row one"><div class="form-group">
+                <label class="form-label">Email <span>*</span></label>
+                <input class="form-input" type="email" id="proj-email" placeholder="votre@capitole-energie.com" required/>
+                <span class="form-error-msg" id="proj-email-err">Email invalide</span>
+              </div></div>
+              <div class="form-row two">
+                <div class="form-group">
+                  <label class="form-label">Type de demande <span>*</span></label>
+                  <div class="select-wrap"><select class="form-select" id="proj-type" required>
+                    <option value="">Sélectionner…</option>
+                    <option value="Optimisation de l'existant">Optimisation de l'existant</option>
+                    <option value="Nouveauté">Nouveauté</option>
+                  </select></div>
+                  <span class="form-error-msg" id="proj-type-err">Champ obligatoire</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Service <span>*</span></label>
+                  <div class="select-wrap"><select class="form-select" id="proj-service" required>
+                    <option value="">Sélectionner…</option>
+                    <option>Commercial</option><option>Back-Office</option><option>Finance</option>
+                    <option>Marketing</option><option>Pricing</option><option>Direction</option>
+                    <option>IT / RSI</option><option>RH</option><option>Autre</option>
+                  </select></div>
+                  <span class="form-error-msg" id="proj-service-err">Champ obligatoire</span>
+                </div>
+              </div>
+              <div class="form-row one"><div class="form-group">
+                <label class="form-label">Titre de la demande <span>*</span></label>
+                <input class="form-input" type="text" id="proj-titre" placeholder="Saisir votre texte" required/>
+                <span class="form-error-msg" id="proj-titre-err">Champ obligatoire</span>
+              </div></div>
+              <div class="form-row one"><div class="form-group">
+                <label class="form-label">Description de la demande <span>*</span></label>
+                <p class="form-hint">Ajoutez toute information complémentaire utile (fichier actuel, process concerné, contraintes…).</p>
+                <textarea class="form-textarea" id="proj-desc" placeholder="Décrivez votre besoin..." required></textarea>
+                <span class="form-error-msg" id="proj-desc-err">Champ obligatoire</span>
+              </div></div>
+              <div class="form-row one"><div class="form-group">
+                <label class="form-label">Priorité ressentie <span>*</span></label>
+                <div class="select-wrap"><select class="form-select" id="proj-priorite" required>
+                  <option value="">Sélectionner la priorité…</option>
+                  <option value="urgent">🔴 Urgente</option>
+                  <option value="high">🟠 Élevée</option>
+                  <option value="normal">🔵 Normale</option>
+                  <option value="low">⚪ Basse</option>
+                </select></div>
+                <span class="form-error-msg" id="proj-priorite-err">Champ obligatoire</span>
+              </div></div>
+              <div class="form-row one"><div class="form-group">
+                <label class="form-label">Pièces jointes</label>
+                <div class="file-drop" id="proj-drop" onclick="document.getElementById('proj-file-input').click()" ondragover="dragOver(event,'proj-drop')" ondragleave="dragLeave(event,'proj-drop')" ondrop="dropFile(event,'proj-files','proj-drop')">
+                  <div class="file-drop-icon">📎</div><p>Déposez vos fichiers ici ou <strong>cliquez pour charger</strong></p>
+                </div>
+                <input type="file" id="proj-file-input" multiple style="display:none" onchange="addFiles(this,'proj-files')"/>
+                <div class="file-list" id="proj-files"></div>
+              </div></div>
+              <button type="button" class="form-submit" style="background:var(--blue)" onclick="submitForm('projet',this)">
+                <div class="spin"></div><span class="btn-text">📋 Soumettre la demande de projet</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- BUG -->
+      <div class="form-panel" id="panel-bug">
+        <div class="form-card" style="border-top:3px solid var(--pink)">
+          <div class="form-card-header">
+            <div class="form-card-icon" style="background:#E543DC18;color:var(--pink)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div>
+              <div class="form-card-title">Déclaration de bug ou incident IT</div>
+              <div class="form-card-sub" style="color:var(--pink)">Bug ou anomalie sur les outils IT</div>
+              <p class="form-card-desc">Pour toute demande critique, référez-vous au formulaire des urgences. Plus vos informations sont précises, plus nous pourrons reproduire et corriger rapidement.</p>
+            </div>
+          </div>
+          <div class="form-body">
+            <form id="form-bug" novalidate>
+              <div class="form-row one"><div class="form-group">
+                <label class="form-label">Email <span>*</span></label>
+                <input class="form-input" type="email" id="bug-email" placeholder="votre@capitole-energie.com" required/>
+                <span class="form-error-msg" id="bug-email-err">Email invalide</span>
+              </div></div>
+              <div class="form-row two">
+                <div class="form-group">
+                  <label class="form-label">Service <span>*</span></label>
+                  <div class="select-wrap"><select class="form-select" id="bug-service" required>
+                    <option value="">Sélectionner…</option>
+                    <option>Commercial</option><option>Back-Office</option><option>Finance</option>
+                    <option>Marketing</option><option>Pricing</option><option>Direction</option>
+                    <option>IT / RSI</option><option>RH</option><option>Autre</option>
+                  </select></div>
+                  <span class="form-error-msg" id="bug-service-err">Champ obligatoire</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Outil concerné <span>*</span></label>
+                  <div class="select-wrap"><select class="form-select" id="bug-outil" required>
+                    <option value="">Sélectionner…</option>
+                    <option>Zendesk</option><option>Microsoft 365</option><option>Microsoft Account</option>
+                    <option>Discord</option><option>PowerBI</option><option>3CX</option>
+                    <option>Enedis</option><option>Hubspot</option><option>Matériel IT</option>
+                  </select></div>
+                  <span class="form-error-msg" id="bug-outil-err">Champ obligatoire</span>
+                </div>
+              </div>
+              <div class="form-row one"><div class="form-group">
+                <label class="form-label">Titre de la demande <span>*</span></label>
+                <input class="form-input" type="text" id="bug-titre" placeholder="Saisir votre texte" required/>
+                <span class="form-error-msg" id="bug-titre-err">Champ obligatoire</span>
+              </div></div>
+              <div class="form-row one"><div class="form-group">
+                <label class="form-label">Description de la demande <span>*</span></label>
+                <p class="form-hint">Décrivez le problème observé et comment le reproduire ?</p>
+                <textarea class="form-textarea" id="bug-desc" placeholder="Décrivez le bug ou l'incident..." required></textarea>
+                <span class="form-error-msg" id="bug-desc-err">Champ obligatoire</span>
+              </div></div>
+              <div class="form-row two">
+                <div class="form-group">
+                  <label class="form-label">Impact <span>*</span></label>
+                  <div class="select-wrap"><select class="form-select" id="bug-impact" required>
+                    <option value="">Sélectionner…</option>
+                    <option value="Mineur">Mineur</option>
+                    <option value="Gênant">Gênant</option>
+                    <option value="Bloquant">Bloquant</option>
+                  </select></div>
+                  <span class="form-error-msg" id="bug-impact-err">Champ obligatoire</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Priorité ressentie <span>*</span></label>
+                  <div class="select-wrap"><select class="form-select" id="bug-priorite" required>
+                    <option value="">Sélectionner la priorité…</option>
+                    <option value="urgent">🔴 Urgente</option>
+                    <option value="high">🟠 Élevée</option>
+                    <option value="normal">🔵 Normale</option>
+                    <option value="low">⚪ Basse</option>
+                  </select></div>
+                  <span class="form-error-msg" id="bug-priorite-err">Champ obligatoire</span>
+                </div>
+              </div>
+              <div class="form-row one"><div class="form-group">
+                <label class="form-label">Pièces jointes</label>
+                <div class="file-drop" id="bug-drop" onclick="document.getElementById('bug-file-input').click()" ondragover="dragOver(event,'bug-drop')" ondragleave="dragLeave(event,'bug-drop')" ondrop="dropFile(event,'bug-files','bug-drop')">
+                  <div class="file-drop-icon">📎</div><p>Déposez vos fichiers ici ou <strong>cliquez pour charger</strong></p>
+                </div>
+                <input type="file" id="bug-file-input" multiple style="display:none" onchange="addFiles(this,'bug-files')"/>
+                <div class="file-list" id="bug-files"></div>
+              </div></div>
+              <button type="button" class="form-submit" style="background:var(--pink)" onclick="submitForm('bug',this)">
+                <div class="spin"></div><span class="btn-text">🐛 Soumettre la déclaration de bug</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <div class="toast-icon" id="toast-icon"></div>
+  <div><div class="toast-title" id="toast-title"></div><div class="toast-msg" id="toast-msg"></div></div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════
+   CONFIG BACKEND
+══════════════════════════════════════════════════ */
+window.PORTAIL_API_URL = window.PORTAIL_API_URL || '';
+const API_BASE = (window.PORTAIL_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:3000' : '')).replace(/\/$/, '');
+
+const COLS = [
+  { key:'a faire',            label:'À faire',       color:'#9D4EDD', bg:'#9D4EDD18' },
+  { key:'en cours',           label:'En cours',      color:'#0C32FF', bg:'#0C32FF18' },
+  { key:'en pause',           label:'En pause',      color:'#A8A8A8', bg:'#A8A8A818' },
+  { key:'en test utilisateur',label:'En test',       color:'#FFC14F', bg:'#FFC14F18' },
+  { key:'livré dev',          label:'À livrer',      color:'#33CFAA', bg:'#33CFAA18' },
+  { key:'livré',              label:'Livré',         color:'#52DD5D', bg:'#52DD5D18' },
+];
+
+/* ══════════════════════════════════════════════════
+   HELPERS API BACKEND
+══════════════════════════════════════════════════ */
+async function apiFetch(path, options = {}){
+  const url = `${API_BASE}${path}`;
+  const response = await fetch(url, options);
+  const contentType = response.headers.get('content-type') || '';
+  const payload = contentType.includes('application/json')
+    ? await response.json().catch(() => ({}))
+    : await response.text().catch(() => '');
+
+  if(!response.ok){
+    const message = typeof payload === 'string'
+      ? payload
+      : payload?.error || payload?.message || `HTTP ${response.status}`;
+    throw new Error(message);
+  }
+  return payload;
+}
+
+/* ══════════════════════════════════════════════════
+   FETCH KPIS + PROJETS VIA BACKEND
+══════════════════════════════════════════════════ */
+async function fetchTicketKPIs(){
+  return apiFetch('/api/tickets/kpis');
+}
+
+async function fetchProjects(){
+  const data = await apiFetch('/api/projects');
+  return data.projects || [];
+}
+
+/* ══════════════════════════════════════════════════
+   RENDER KPIs TICKETS
+══════════════════════════════════════════════════ */
+function renderTicketKPIs(done,todo){
+  const total = done+todo;
+  const ratio = total>0 ? ((done/total)*100).toFixed(1) : '0.0';
+  document.getElementById('kpi-done').textContent = done.toLocaleString('fr-FR');
+  document.getElementById('kpi-todo').textContent = todo;
+  document.getElementById('kpi-ratio').textContent = ratio+'%';
+  document.getElementById('kpi-progfill').style.width = ratio+'%';
+  document.getElementById('kpi-prog-left').textContent = `${done.toLocaleString('fr-FR')} tickets traités`;
+  document.getElementById('kpi-prog-right').textContent = `${todo} restant${todo>1?'s':''}`;
+}
+
+/* ══════════════════════════════════════════════════
+   RENDER KANBAN PROJETS
+══════════════════════════════════════════════════ */
+function av(a){return a.p?`<div class="avatar"><img src="${a.p}" loading="lazy" alt="${a.i}"/></div>`:`<div class="avatar">${a.i}</div>`}
+
+function renderKanban(projects){
+  const counts={};
+  COLS.forEach(c=>counts[c.key]=0);
+  projects.forEach(p=>{ if(counts[p.status]!==undefined) counts[p.status]++; });
+  const kpiDefs=[
+    {val:projects.length,lbl:'Total',color:'var(--dark)'},
+    {val:counts['en cours'],lbl:'En cours',color:'var(--blue)'},
+    {val:counts['en pause'],lbl:'En pause',color:'var(--grey3)'},
+    {val:counts['en test utilisateur'],lbl:'En test',color:'var(--yellow)'},
+    {val:counts['livré']+counts['livré dev'],lbl:'Livrés',color:'var(--teal)'},
+  ];
+  document.getElementById('proj-kpis').innerHTML=kpiDefs.map(k=>
+    `<div class="proj-kpi"><div class="proj-kpi-val" style="color:${k.color}">${k.val}</div><div class="proj-kpi-lbl">${k.lbl}</div></div>`
+  ).join('');
+
+  document.getElementById('kanban-board').innerHTML=COLS.map(col=>{
+    const tasks=projects.filter(p=>p.status===col.key);
+    const cards=tasks.length
+      ? tasks.map(p=>`
+          <div class="proj-card">
+            <div class="proj-card-name">${p.name}</div>
+            <div class="proj-card-footer">
+              <div class="avatars">${p.assignees.slice(0,3).map(av).join('')}</div>
+            </div>
+          </div>`).join('')
+      : `<div class="empty-col">Aucune tâche</div>`;
+    return `<div class="kanban-col">
+      <div class="kanban-header">
+        <span class="kanban-title" style="color:${col.color}">${col.label}</span>
+        <span class="kanban-count" style="background:${col.bg};color:${col.color}">${tasks.length}</span>
+      </div>
+      <div class="kanban-cards">${cards}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════
+   ACTUALISER TOUT — bouton + auto au chargement
+══════════════════════════════════════════════════ */
+async function refreshAll(){
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+  btn.disabled = true;
+
+  try{
+    const [kpis, projects] = await Promise.all([
+      fetchTicketKPIs(),
+      fetchProjects()
+    ]);
+    renderTicketKPIs(kpis.done, kpis.todo);
+    renderKanban(projects);
+    const now = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('last-update').textContent = `· ${now}`;
+  } catch(err){
+    console.error('Erreur refresh:', err);
+    showToast(false,'Erreur de synchronisation',`Impossible de contacter le backend : ${err.message}`);
+  } finally{
+    btn.classList.remove('spinning');
+    btn.disabled = false;
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════ */
+const LABELS={dashboard:'Sommaire',projects:'Projets',forms:'Formulaires'};
+function go(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('s-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  document.getElementById('section-label').textContent=LABELS[id]||id;
+}
+function switchTab(name,btn){
+  document.querySelectorAll('.form-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.form-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ══════════════════════════════════════════════════
+   FILE UPLOAD
+══════════════════════════════════════════════════ */
+const fileStore={};
+function addFiles(input,lid){if(!fileStore[lid])fileStore[lid]=[];Array.from(input.files).forEach(f=>fileStore[lid].push(f));renderFiles(lid);input.value='';}
+function dropFile(e,lid,did){e.preventDefault();dragLeave(e,did);if(!fileStore[lid])fileStore[lid]=[];Array.from(e.dataTransfer.files).forEach(f=>fileStore[lid].push(f));renderFiles(lid);}
+function dragOver(e,id){e.preventDefault();document.getElementById(id).classList.add('dragover')}
+function dragLeave(e,id){document.getElementById(id).classList.remove('dragover')}
+function removeFile(lid,idx){fileStore[lid].splice(idx,1);renderFiles(lid)}
+function renderFiles(lid){
+  document.getElementById(lid).innerHTML=(fileStore[lid]||[]).map((f,i)=>
+    `<div class="file-item"><span class="file-item-name">📄 ${f.name}</span><button class="file-remove" onclick="removeFile('${lid}',${i})">×</button></div>`).join('');
+}
+
+/* ══════════════════════════════════════════════════
+   VALIDATION
+══════════════════════════════════════════════════ */
+function vf(id,eid){
+  const el=document.getElementById(id),val=el.value.trim();
+  const ok=el.type==='email'?/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val):val!=='';
+  el.classList.toggle('error',!ok);
+  const e=document.getElementById(eid);if(e)e.classList.toggle('show',!ok);
+  return ok;
+}
+
+/* ══════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════ */
+function showToast(ok,title,msg){
+  const t=document.getElementById('toast'),ic=document.getElementById('toast-icon');
+  document.getElementById('toast-title').textContent=title;
+  document.getElementById('toast-msg').textContent=msg;
+  if(ok){ic.style.cssText='background:#52DD5D18;color:#52DD5D';ic.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';}
+  else{ic.style.cssText='background:#EE734F18;color:var(--coral)';ic.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';}
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),5500);
+}
+
+/* ══════════════════════════════════════════════════
+   SOUMISSION — via backend sécurisé
+══════════════════════════════════════════════════ */
+async function submitForm(type,btn){
+  let valid = true;
+  const data = { type };
+  let filesId = '';
+
+  if(type==='urgence'){
+    valid=[vf('urg-email','urg-email-err'),vf('urg-service','urg-service-err'),vf('urg-outil','urg-outil-err'),vf('urg-criticite','urg-criticite-err'),vf('urg-titre','urg-titre-err'),vf('urg-desc','urg-desc-err')].every(Boolean);
+    if(!valid)return;
+    data.email = document.getElementById('urg-email').value.trim();
+    data.service = document.getElementById('urg-service').value.trim();
+    data.outil = document.getElementById('urg-outil').value.trim();
+    data.criticite = document.getElementById('urg-criticite').value.trim();
+    data.titre = document.getElementById('urg-titre').value.trim();
+    data.description = document.getElementById('urg-desc').value.trim();
+    filesId='urg-files';
+  } else if(type==='projet'){
+    valid=[vf('proj-email','proj-email-err'),vf('proj-type','proj-type-err'),vf('proj-service','proj-service-err'),vf('proj-titre','proj-titre-err'),vf('proj-desc','proj-desc-err'),vf('proj-priorite','proj-priorite-err')].every(Boolean);
+    if(!valid)return;
+    data.email = document.getElementById('proj-email').value.trim();
+    data.typeDemande = document.getElementById('proj-type').value.trim();
+    data.service = document.getElementById('proj-service').value.trim();
+    data.titre = document.getElementById('proj-titre').value.trim();
+    data.description = document.getElementById('proj-desc').value.trim();
+    data.priorite = document.getElementById('proj-priorite').value.trim();
+    filesId='proj-files';
+  } else if(type==='bug'){
+    valid=[vf('bug-email','bug-email-err'),vf('bug-service','bug-service-err'),vf('bug-outil','bug-outil-err'),vf('bug-titre','bug-titre-err'),vf('bug-desc','bug-desc-err'),vf('bug-impact','bug-impact-err'),vf('bug-priorite','bug-priorite-err')].every(Boolean);
+    if(!valid)return;
+    data.email = document.getElementById('bug-email').value.trim();
+    data.service = document.getElementById('bug-service').value.trim();
+    data.outil = document.getElementById('bug-outil').value.trim();
+    data.titre = document.getElementById('bug-titre').value.trim();
+    data.description = document.getElementById('bug-desc').value.trim();
+    data.impact = document.getElementById('bug-impact').value.trim();
+    data.priorite = document.getElementById('bug-priorite').value.trim();
+    filesId='bug-files';
+  }
+
+  btn.disabled=true;btn.classList.add('loading');
+  try{
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => formData.append(key, value ?? ''));
+    (fileStore[filesId] || []).forEach(file => formData.append('attachments', file, file.name));
+
+    const result = await apiFetch('/api/forms/submit', {
+      method: 'POST',
+      body: formData
+    });
+
+    const filesCount = Number(result.attachments_uploaded || 0);
+    showToast(true,'Demande envoyée ✓',`Tâche #${result.task_id} créée dans ClickUp${filesCount ? ` avec ${filesCount} pièce(s) jointe(s)` : ''}.`);
+    document.getElementById('form-'+type).reset();
+    ['urg-files','proj-files','bug-files'].forEach(id=>{
+      const el=document.getElementById(id);if(el)el.innerHTML='';fileStore[id]=[];
+    });
+    setTimeout(()=>refreshAll(),1500);
+  }catch(err){
+    console.error(err);
+    showToast(false,"Erreur lors de l'envoi",`${err.message}`);
+  }finally{
+    btn.disabled=false;btn.classList.remove('loading');
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded',()=>{
+  const d=new Date(),s=d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('today-date').textContent=s.charAt(0).toUpperCase()+s.slice(1);
+  refreshAll();
+});
+</script>
+</body>
+</html>
