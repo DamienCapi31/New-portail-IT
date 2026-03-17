@@ -176,14 +176,14 @@ export default async function handler(req, res) {
         status: 'to do'
       };
     } else if (type === 'projet') {
-      listId = LIST_BACKLOG;
+      listId = '901212828170';
       typeTicket = 'Demande de projet';
       taskPayload = {
         name: titre,
         description,
         priority: PMAP[priorite] || 3,
-        status: 'to do'
-      };
+        status: 'A qualifier'
+  };
     } else if (type === 'bug') {
       listId = LIST_TICKETS;
       typeTicket = 'Bug / Incident IT';
