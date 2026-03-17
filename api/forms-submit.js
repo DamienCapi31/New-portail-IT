@@ -108,6 +108,7 @@ function buildCustomFields(fields, payload) {
   pushDropdown('Criticité métier', payload.criticite);
   pushDropdown('Impact', payload.impact);
   pushDropdown('Type Ticket', payload.typeTicket);
+  pushText('Objet SF', payload.objetSF);
 
   return out;
 }
@@ -155,8 +156,11 @@ export default async function handler(req, res) {
     const description = firstValue(fields.description)?.trim();
     const priorite = firstValue(fields.priorite)?.trim();
     const typeDemande = firstValue(fields.typeDemande)?.trim();
+    const importModule = firstValue(fields.importModule)?.trim();
 
-    if (!type || !email || !titre || !description) {
+    const attachments = toArray(files.attachments);
+
+    if (!type || !email) {
       return res.status(400).json({
         error: 'Champs obligatoires manquants'
       });
@@ -165,8 +169,13 @@ export default async function handler(req, res) {
     let listId = '';
     let typeTicket = '';
     let taskPayload = {};
+    let objetSF = '';
 
     if (type === 'urgence') {
+      if (!service || !outil || !criticite || !titre || !description) {
+        return res.status(400).json({ error: 'Champs obligatoires manquants' });
+      }
+
       listId = LIST_TICKETS;
       typeTicket = 'Incident urgent';
       taskPayload = {
@@ -176,6 +185,10 @@ export default async function handler(req, res) {
         status: 'to do'
       };
     } else if (type === 'projet') {
+      if (!service || !titre || !description || !priorite) {
+        return res.status(400).json({ error: 'Champs obligatoires manquants' });
+      }
+
       listId = '901212828170';
       typeTicket = 'Demande de projet';
       taskPayload = {
@@ -183,13 +196,34 @@ export default async function handler(req, res) {
         description,
         priority: PMAP[priorite] || 3,
         status: 'A qualifier'
-  };
+      };
     } else if (type === 'bug') {
+      if (!service || !outil || !titre || !description || !impact || !priorite) {
+        return res.status(400).json({ error: 'Champs obligatoires manquants' });
+      }
+
       listId = LIST_TICKETS;
       typeTicket = 'Bug / Incident IT';
       taskPayload = {
         name: `[BUG] ${titre}`,
         description,
+        priority: PMAP[priorite] || 3,
+        status: 'to do'
+      };
+    } else if (type === 'import') {
+      if (!service || !priorite || attachments.length === 0) {
+        return res.status(400).json({
+          error: "Pour l'import, email, service, priorité et fichier sont obligatoires"
+        });
+      }
+
+      listId = LIST_TICKETS;
+      typeTicket = 'Import SF';
+      objetSF = importModule || 'Import Salesforce';
+
+      taskPayload = {
+        name: `[IMPORT SF] ${objetSF}`,
+        description: `Demande d'import Salesforce${importModule ? ` — ${importModule}` : ''}`,
         priority: PMAP[priorite] || 3,
         status: 'to do'
       };
@@ -206,14 +240,13 @@ export default async function handler(req, res) {
       criticite,
       impact,
       typeTicket,
-      typeDemande
+      typeDemande,
+      objetSF
     });
 
     const task = await cuPost(`/list/${listId}/task`, taskPayload);
 
-    const attachments = toArray(files.attachments);
     let uploaded = 0;
-
     for (const file of attachments) {
       await uploadAttachment(task.id, file);
       uploaded++;
