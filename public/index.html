@@ -626,7 +626,7 @@ async function apiFetch(path, options = {}){
    FETCH KPIS + PROJETS VIA BACKEND
 ══════════════════════════════════════════════════ */
 async function fetchTicketKPIs(){
-  return apiFetch('/api/tickets/kpis');
+  return apiFetch('/api/tickets-kpis');
 }
 
 async function fetchProjects(){
@@ -817,7 +817,7 @@ async function submitForm(type,btn){
     Object.entries(data).forEach(([key, value]) => formData.append(key, value ?? ''));
     (fileStore[filesId] || []).forEach(file => formData.append('attachments', file, file.name));
 
-    const result = await apiFetch('/api/forms/submit', {
+    const result = await apiFetch('/api/forms-submit', {
       method: 'POST',
       body: formData
     });
