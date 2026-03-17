@@ -629,9 +629,13 @@ async function fetchTicketKPIs(){
   return apiFetch('/api/tickets-kpis');
 }
 
-async function fetchProjects(){
-  const data = await apiFetch('/api/projects');
-  return data.projects || [];
+async function fetchProjects() {
+  const r = await fetch('/api/projects');
+  if (!r.ok) {
+    const text = await r.text();
+    throw new Error(text || `HTTP ${r.status}`);
+  }
+  return r.json();
 }
 
 /* ══════════════════════════════════════════════════
