@@ -99,7 +99,7 @@ function buildCustomFields(fields, payload) {
     if (!field) return;
     const optionId = getDropdownOptionId(field, value);
     if (!optionId) return;
-    out.push({ id: field.id, value: optionId });
+    out.push({ id: field.id, value: [optionId] });
   };
 
   pushText('Email', payload.email);
