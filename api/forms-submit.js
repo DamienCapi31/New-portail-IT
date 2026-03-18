@@ -93,21 +93,39 @@ function buildCustomFields(fields, payload) {
     out.push({ id: field.id, value: String(value) });
   };
 
-  const pushDropdown = (fieldName, value) => {
+  const pushSelect = (fieldName, value) => {
     if (!value) return;
     const field = findField(fields, fieldName);
     if (!field) return;
+
     const optionId = getDropdownOptionId(field, value);
     if (!optionId) return;
+
+    const fieldType = (field.type || '').toLowerCase();
+
+    // Certains champs ClickUp attendent un scalaire, d'autres un array.
+    if (fieldType === 'labels' || fieldType === 'tasks' || fieldType === 'users') {
+      out.push({ id: field.id, value: [optionId] });
+      return;
+    }
+
+    // Pour éviter FIELD_157 sur les champs de type liste/multi-select :
+    const optionsCount = Array.isArray(field?.type_config?.options) ? field.type_config.options.length : 0;
+    if (fieldType === 'drop_down' || fieldType === 'dropdown') {
+      out.push({ id: field.id, value: optionId });
+      return;
+    }
+
+    // Fallback robuste : si ClickUp attend un array pour ce field custom
     out.push({ id: field.id, value: [optionId] });
   };
 
   pushText('Email', payload.email);
-  pushDropdown('Service', payload.service);
-  pushDropdown('Outil', payload.outil);
-  pushDropdown('Criticité métier', payload.criticite);
-  pushDropdown('Impact', payload.impact);
-  pushDropdown('Type Ticket', payload.typeTicket);
+  pushSelect('Service', payload.service);
+  pushSelect('Outil', payload.outil);
+  pushSelect('Criticité métier', payload.criticite);
+  pushSelect('Impact', payload.impact);
+  pushSelect('Type Ticket', payload.typeTicket);
   pushText('Objet SF', payload.objetSF);
 
   return out;
@@ -161,9 +179,7 @@ export default async function handler(req, res) {
     const attachments = toArray(files.attachments);
 
     if (!type || !email) {
-      return res.status(400).json({
-        error: 'Champs obligatoires manquants'
-      });
+      return res.status(400).json({ error: 'Champs obligatoires manquants' });
     }
 
     let listId = '';
@@ -217,6 +233,19 @@ export default async function handler(req, res) {
         });
       }
 
+      const firstFile = attachments[0];
+      const filename = (firstFile?.originalFilename || '').toLowerCase();
+      const isExcelOrCsv =
+        filename.endsWith('.xlsx') ||
+        filename.endsWith('.xls') ||
+        filename.endsWith('.csv');
+
+      if (!isExcelOrCsv) {
+        return res.status(400).json({
+          error: "Le fichier import doit être un Excel (.xlsx, .xls) ou un CSV (.csv)"
+        });
+      }
+
       listId = LIST_TICKETS;
       typeTicket = 'Import SF';
       objetSF = importModule || 'Import Salesforce';
@@ -232,7 +261,6 @@ export default async function handler(req, res) {
     }
 
     const customFields = await getCustomFields(listId);
-
     taskPayload.custom_fields = buildCustomFields(customFields, {
       email,
       service,
