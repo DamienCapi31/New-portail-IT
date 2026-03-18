@@ -261,6 +261,13 @@ export default async function handler(req, res) {
     }
 
     const customFields = await getCustomFields(listId);
+    if (type === 'import') {
+      taskPayload.custom_fields = buildCustomFields(customFields, {
+        email,
+        service,
+        priorite
+  });
+}   else {
     taskPayload.custom_fields = buildCustomFields(customFields, {
       email,
       service,
@@ -270,7 +277,8 @@ export default async function handler(req, res) {
       typeTicket,
       typeDemande,
       objetSF
-    });
+  });
+}
 
     const task = await cuPost(`/list/${listId}/task`, taskPayload);
 
